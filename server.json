@@ -1,0 +1,11 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-09-29/server.schema.json",
+  "name": "io.github.MohDev212/sender-guard",
+  "title": "VerifyPulse Sender Guard",
+  "description": "Audit SPF, DKIM, DMARC and MX for sending domains, flatten SPF, and detect DNS changes.",
+  "version": "1.0.0",
+  "repository": { "url": "https://github.com/MohDev212/sender-guard", "source": "github" },
+  "remotes": [
+    { "type": "streamable-http", "url": "https://verifypulse-seven.vercel.app/mcp" }
+  ]
+}

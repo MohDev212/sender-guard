@@ -1,0 +1,31 @@
+# Copy this file to .github/workflows/sender-guard.yml in your own repository.
+name: Sender Guard
+on:
+  schedule:
+    - cron: "17 6 * * *"
+  workflow_dispatch:
+permissions:
+  contents: write
+  issues: write
+jobs:
+  monitor:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - id: guard
+        uses: MohDev212/sender-guard@v1
+        with:
+          pass: ${{ secrets.SENDER_GUARD_PASS }}
+          slack-webhook-url: ${{ secrets.SLACK_WEBHOOK_URL }}
+      - name: Save state
+        run: |
+          git config user.name "sender-guard"
+          git config user.email "sender-guard@users.noreply.github.com"
+          git add .sender-guard/state.json
+          git diff --cached --quiet || git commit -m "sender-guard: update state"
+          git push
+      - name: Open an issue for changes
+        if: steps.guard.outputs.changed == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh issue create --title "Sender Guard: authentication changes $(date -u +%F)" --body-file sender-guard-report.txt

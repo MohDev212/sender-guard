@@ -1,0 +1,36 @@
+name: "Sender Guard"
+description: "Monitor SPF, DKIM, DMARC and MX for your sending domains and report what changed since the last run."
+author: "VerifyPulse"
+branding:
+  icon: "shield"
+  color: "blue"
+inputs:
+  domains-file:
+    description: "Path to a text file with one domain per line."
+    required: false
+    default: "domains.txt"
+  state-file:
+    description: "Where the last known state is kept. Commit this file so the next run can compare against it."
+    required: false
+    default: ".sender-guard/state.json"
+  pass:
+    description: "Sender Guard pass. Not needed for 3 domains or fewer."
+    required: false
+    default: ""
+  slack-webhook-url:
+    description: "Optional Slack-compatible webhook that receives the alert text."
+    required: false
+    default: ""
+outputs:
+  changed:
+    description: "'true' when at least one record changed."
+    value: ${{ steps.run.outputs.changed }}
+runs:
+  using: "composite"
+  steps:
+    - id: run
+      shell: bash
+      env:
+        SENDER_GUARD_PASS: ${{ inputs.pass }}
+        SLACK_WEBHOOK_URL: ${{ inputs.slack-webhook-url }}
+      run: python3 "${{ github.action_path }}/sender_guard.py" "${{ inputs.domains-file }}" "${{ inputs.state-file }}" || [ $? -eq 1 ]
